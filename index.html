@@ -33,6 +33,7 @@
             <img src="./public/snap.jpg" class="image" alt="QR CODE">
         </div>
         <div class="status">
+            <p class="state_text">Not Connected</p>
             <p class="status_text"></p>
         </div>
         <div class="box_container">
@@ -56,25 +57,57 @@
 
         const status_text = document.querySelector('.status_text'); 
         const image = document.querySelector('.image');
+        const connectedState = document.querySelector('.state_text');
+
+        const personal = document.querySelector('#personal');
+        const wishes = document.querySelector('#wishes');
+        const group = document.querySelector('#group');
         
-        socket.on('notification',(notification)=>{
-            status_text.innerHTML = notification ;
+        socket.on('notification',(state)=>{
+            console.log(state);
+            status_text.innerHTML = state.notification ;
+            if(state.connected === true){
+                connectedState.innerHTML = 'Connected';
+                personal.innerHTML = state.personalChats|| 0;
+                wishes.innerHTML = state.wishes || 0;
+                group.innerHTML = state.groupChats || 0;
+            }
+            else{
+                connectedState.innerHTML = 'Not Connected';
+                personal.innerHTML = 0;
+                wishes.innerHTML = 0;
+                group.innerHTML = 0;
+            }
             setTimeout(() => {
-                status_text.innerHTML = '...';
+                status_text.innerHTML = ' ';
             }, 3000); 
         })
-        socket.on('message',(text)=>{
-            status_text.innerHTML = text;
+        socket.on('message',(state)=>{
+            if(state.connected === true){
+                connectedState.innerHTML = 'Connected';
+                personal.innerHTML = state.personalChats|| 0;
+                wishes.innerHTML = state.wishes || 0;
+                group.innerHTML = state.groupChats || 0;
+            }
+            else{
+                connectedState.innerHTML = 'Not Connected';
+                personal.innerHTML = 0;
+                wishes.innerHTML = 0;
+                group.innerHTML = 0;
+            }
+            status_text.innerHTML = state.notification;
             setTimeout(() => {
-                status_text.innerHTML = '...';
+                status_text.innerHTML = ' ';
             }, 3000);  
         })
         socket.on('qrcode',(code)=>{
             image.src = code; 
         })
-        socket.on('connected',(code)=>{
+        socket.on('authenticated',(state)=>{
             image.src = './public/snap.jpg'; 
         })
+
+        socket.on('')
      </script>
 </body>
 </html>

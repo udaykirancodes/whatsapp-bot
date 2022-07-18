@@ -60,8 +60,10 @@ a{
     align-items: center;
     justify-content: center;
     padding: 10px;
+    flex-direction: column;
+    gap: 10px;
 }
-.status_text{
+.status_text , .state_text{
     color: yellow;
     font-size: 16px;
     letter-spacing: .5px;
