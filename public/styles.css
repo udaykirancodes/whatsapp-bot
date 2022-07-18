@@ -63,15 +63,14 @@ a{
 }
 .status_text{
     color: yellow;
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: .5px;
 }
 .box_container{
     width: 500px;
-    margin: 2rem;
     height: max-content;
     display: flex;
-    margin: 2rem auto;
+    margin: 1rem auto;
     align-items: center;
     justify-content: space-between;
 }

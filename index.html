@@ -7,6 +7,9 @@
     <link rel="shortcut icon" href="./public/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./public/styles.css">
+    <!-- <script type="text/javascript" src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script> -->
+    <script src = "/socket.io/socket.io.js"></script>
+    
 </head>
 <body>
     <div class="container">
@@ -30,7 +33,7 @@
             <img src="./public/snap.jpg" class="image" alt="QR CODE">
         </div>
         <div class="status">
-            <p class="status_text">Connecting...</p>
+            <p class="status_text"></p>
         </div>
         <div class="box_container">
             <div class="box">
@@ -47,5 +50,31 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const socket = io.connect();
+
+        const status_text = document.querySelector('.status_text'); 
+        const image = document.querySelector('.image');
+        
+        socket.on('notification',(notification)=>{
+            status_text.innerHTML = notification ;
+            setTimeout(() => {
+                status_text.innerHTML = '...';
+            }, 3000); 
+        })
+        socket.on('message',(text)=>{
+            status_text.innerHTML = text;
+            setTimeout(() => {
+                status_text.innerHTML = '...';
+            }, 3000);  
+        })
+        socket.on('qrcode',(code)=>{
+            image.src = code; 
+        })
+        socket.on('connected',(code)=>{
+            image.src = './public/snap.jpg'; 
+        })
+     </script>
 </body>
 </html>
