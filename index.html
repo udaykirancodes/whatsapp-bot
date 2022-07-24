@@ -53,7 +53,7 @@
     </div>
 
     <script>
-        const socket = io.connect();
+        const socket = io.connect('http://localhost:8000/');
 
         const status_text = document.querySelector('.status_text'); 
         const image = document.querySelector('.image');
