@@ -100,8 +100,9 @@
                 status_text.innerHTML = ' ';
             }, 3000);  
         })
-        socket.on('qrcode',(code)=>{
-            image.src = code; 
+        socket.on('qrcode',(url)=>{
+            alert('QrCode')
+            image.src = url ; 
         })
         socket.on('authenticated',(state)=>{
             image.src = './public/snap.jpg'; 
