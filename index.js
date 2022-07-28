@@ -23,7 +23,6 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 
 
 // WEBJS BOT CODE 
-const { Client, RemoteAuth } = require('whatsapp-web.js');
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 
@@ -37,10 +36,21 @@ const state = {
     notification: 'Connecting To WhatsApp Web'
 }
 
+const { Client, RemoteAuth } = require('whatsapp-web.js');
 mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log('Mongoose Connected');
     const store = new MongoStore({ mongoose: mongoose });
+    // const client = new Client({
+    //     authStrategy: new RemoteAuth({
+    //         store: store,
+    //         backupSyncIntervalMs: 300000
+    //     })
+    // });
     const client = new Client({
+        puppeteer: {
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
+        },
         authStrategy: new RemoteAuth({
             store: store,
             backupSyncIntervalMs: 300000
