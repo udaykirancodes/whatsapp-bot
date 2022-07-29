@@ -71,8 +71,9 @@ const { Client, RemoteAuth } = require('whatsapp-web.js');
 
 // 1 time client initializer 
 let init = 0;
-const initializer = () => {
+const initializer = async () => {
     mongoose.connect(process.env.MONGODB_URI).then(() => {
+        console.log('DB Connected !!');
         if (init === 0) {
             const store = new MongoStore({ mongoose: mongoose });
             const client = new Client({
@@ -100,6 +101,7 @@ const initializer = () => {
 initializer()
     .then((client) => {
         // Socket IO Starts 
+        console.log('Inside Client !!');
         io.on('connection', (socket) => {
             console.log('User Connected');
             state.notification = 'Connecting to WhatsApp Web Bot !!';
