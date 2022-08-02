@@ -143,7 +143,7 @@ const send = async (message, client) => {
         setTimeout(() => {
             message.reply('Thankyou ❤️');
             return;
-        }, 500);
+        }, 1000);
         sendOut(message, client);
         return;
     }
@@ -153,7 +153,7 @@ const send = async (message, client) => {
         setTimeout(() => {
             message.reply('Hey! Hi👋');
             return;
-        }, 500);
+        }, 1000);
         sendOut(message, client);
         return;
     }
@@ -163,7 +163,7 @@ const send = async (message, client) => {
 const sendOut = (message, client) => {
     setTimeout(() => {
         client.sendMessage(message.from, '~ bot message from Uday');
-    }, 500);
+    }, 1000);
 }
 
 
