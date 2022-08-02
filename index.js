@@ -122,7 +122,7 @@ const socketSender = (emitingEvent, notification) => {
 // seperate function to reply 
 const send = async (message, client) => {
     let msg = message.body.toLowerCase();
-    console.log(msg);
+    //console.log(msg);
     let hiText = ['hi', 'hello', 'hlo', 'hloo', 'hie', 'hii'];
     let greetings = ['good morning', 'good night', 'good afternoon', 'gd mrng', 'gd night']
     socketSender('notification', 'Chat Received');
@@ -195,6 +195,21 @@ app.get('/restart/:password', (req, res) => {
         let pass = req.params.password;
         if (pass === PASSWORD) {
             client.initialize();
+            res.send('success');
+        }
+        else {
+            res.send('wrong password');
+        }
+    } catch (error) {
+        res.send('Something went wrong !')
+    }
+})
+// ROUTE TO RESTART THE CLIENT :: PASSWORD 
+app.get('/logout/:password', (req, res) => {
+    try {
+        let pass = req.params.password;
+        if (pass === PASSWORD) {
+            client.logout();
             res.send('success');
         }
         else {
