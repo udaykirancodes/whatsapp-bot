@@ -100,13 +100,7 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
         }
         if (message.from.endsWith('@c.us')) {
             state.personalChats++;
-            setTimeout(() => {
-                const asyncReactToMessage = async () => {
-                    await message.react('❤️')
-                    send(message, client);
-                }
-                asyncReactToMessage();
-            }, 500);
+            send(message, client);
         }
         else {
             state.groupChats++;
@@ -136,6 +130,7 @@ const send = async (message, client) => {
     let chat = await client.getChats();
     if (msg == '🥰' || msg === '🥳' || msg === '🥰' || msg === '😘' || msg === '😍' || msg === '🤩' || msg === '🥳' || msg === '❤️' || msg === '⚡' || msg === '🔥' || msg === '🤍' || msg === '🖤' || msg === '💥') {
         chat[0].sendSeen()
+        await message.react('❤️')
         chat[0].sendStateTyping();
         setTimeout(() => {
             message.reply(msg);
@@ -145,6 +140,7 @@ const send = async (message, client) => {
         socketSender('notification', 'Someone Wished Uday !!');
         state.wishes++;
         chat[0].sendSeen()
+        await message.react('❤️')
         chat[0].sendStateTyping();
         setTimeout(() => {
             message.reply('Thankyou ❤️');
@@ -155,6 +151,7 @@ const send = async (message, client) => {
     }
     else if (msg == 'hi' || msg == 'hlo' || msg.includes('hi') || msg == 'hello' || msg == 'helo' || msg.includes('hlo')) {
         chat[0].sendSeen()
+        await message.react('❤️')
         chat[0].sendStateTyping();
         setTimeout(() => {
             message.reply('Hey! Hi👋');
