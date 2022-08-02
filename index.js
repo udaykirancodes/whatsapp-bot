@@ -100,6 +100,7 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
         }
         if (message.from.endsWith('@c.us')) {
             state.personalChats++;
+            await message.react('❤️')
             send(message, client);
         }
         else {
