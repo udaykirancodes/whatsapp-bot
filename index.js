@@ -12,13 +12,157 @@ let PASSWORD = process.env.PASSWORD;
 
 // SERVER LISTENING 
 http.listen(process.env.PORT, function () {
-    console.log('server started');
+    console.log('Server Started');
 });
 
 // ROUTES 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
+
+
+
+
+// WEBJS BOT CODE 
+const { MongoStore } = require('wwebjs-mongo');
+const mongoose = require('mongoose');
+
+const qrcode = require('qrcode');
+
+const state = {
+    connected: false,
+    groupChats: 0,
+    wishes: 0,
+    personalChats: 0,
+    notification: ''
+}
+
+const { Client, RemoteAuth } = require('whatsapp-web.js');
+
+
+
+const store = new MongoStore({ mongoose: mongoose });
+let clientCount = 0;
+const client = new Client({
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        headless: true
+    },
+    authStrategy: new RemoteAuth({
+        store: store,
+        backupSyncIntervalMs: 300000
+    })
+});
+let socketter;
+mongoose.connect(process.env.MONGODB_URI).then(() => {
+    console.log('DB Connected !!');
+    if (clientCount === 0) {
+        console.log('Initializing the Client !!');
+        client.initialize();
+        // console.log(clientCount);
+        clientCount++;
+    }
+    io.on('connection', (socket) => {
+        socketter = socket;
+        console.log('User Connected !!');
+        socketSender('notification', 'Connecting to Web Whatsapp Bot !!');
+        // get & send qr code 
+    })
+    client.on('remote_session_saved', () => {
+        console.log('Remote Auth Saved');
+    })
+    client.on('ready', () => {
+        state.notification = 'Bot is Ready!';
+        state.connected = true
+        socketSender('notification', 'Bot is Ready !!');
+        console.log('client is ready!');
+    });
+    client.on('authenticated', (session) => {
+        socketSender('notification', 'Authented Successfully !!');
+        console.log('Authenticated');
+    });
+    client.on('disconnected', (session) => {
+        state.connected = false;
+        socketSender('notification', 'Client Disconnected !!');
+        console.log('disconected');
+    });
+    client.on('qr', qr => {
+        console.log('QR Code Sent!!')
+        socketSender('notification', 'Qr Code Sent , Please Scan !!');
+        qrcode.toDataURL(qr, (err, url) => {
+            socketter.emit('qrcode', url);
+        })
+    });
+    client.on('message', async message => {
+        if (message.isForwarded) {
+            socketSender('notification', 'Forwarded Message Received !!');
+        }
+        if (message.from.endsWith('@c.us')) {
+            send(message, client);
+        }
+        else {
+            state.groupChats++;
+            socketSender('notification', 'Group Chat Received !!');
+        }
+    })
+
+
+})
+
+
+const socketSender = (emitingEvent, notification) => {
+    state.notification = notification;
+    socketter.emit(emitingEvent, state);
+    setTimeout(() => {
+        state.notification = '...';
+    }, 1000);
+}
+
+// seperate function to reply 
+const send = async (message, client) => {
+    let msg = message.body.toLowerCase();
+    console.log(msg);
+    let hiText = ['hi', 'hello', 'hlo', 'hloo', 'hie', 'hii'];
+    let greetings = ['good morning', 'good night', 'good afternoon', 'gd mrng', 'gd night']
+    let chat = await client.getChats();
+    chat[0].sendSeen()
+    chat[0].sendStateTyping();
+    setTimeout(() => {
+        if (msg == '🥰' || msg == '🥳' || msg == '🥰' || msg == '😘' || msg == '😍' || msg == '🤩' || msg == '🥳' || msg == '❤️' || msg == '⚡' || msg == '🔥' || msg == '🤍' || msg == '🖤' || msg == '💥') {
+            message.reply(msg);
+            return;
+        }
+        if (msg.includes('hpy') || msg.includes('hbd') || msg.includes('happy') || msg.includes('birthday') || msg.includes('bornday') || msg.includes('bday')) {
+            socketSender('notification', 'Someone Wished Uday !!');
+            state.wishes++;
+            message.reply('Thankyou ❤️\n');
+            sendOut(message, client);
+            return;
+        }
+        else {
+            client.sendMessage(message.from, 'Uday will connect back to you !!');
+            client.sendMessage(message.from, '~ bot message from Uday');
+        }
+    }, 500);
+
+}
+
+// function to send message as ~ bot message 
+const sendOut = (message, client) => {
+    setTimeout(() => {
+        client.sendMessage(message.from, '~ bot message from Uday');
+    }, 500);
+}
+
+
+
+
+
+
+
+// SERVING STATIC 
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
 // ROUTE TO LOGOUT :: PASSWORD
 app.get('/destroy/:password', (req, res) => {
     try {
@@ -47,170 +191,3 @@ app.get('/restart/:password', (req, res) => {
         res.send('Something went wrong !')
     }
 })
-
-// SERVING STATIC 
-app.use('/public', express.static(path.join(__dirname, 'public')))
-
-
-// WEBJS BOT CODE 
-const { MongoStore } = require('wwebjs-mongo');
-const mongoose = require('mongoose');
-
-const qrcode = require('qrcode');
-
-const state = {
-    connected: false,
-    groupChats: 0,
-    wishes: 0,
-    personalChats: 0,
-    notification: ''
-}
-
-const { Client, RemoteAuth } = require('whatsapp-web.js');
-
-
-// 1 time client initializer 
-let init = 0;
-const initializer = async () => {
-    mongoose.connect(process.env.MONGODB_URI).then(() => {
-        console.log('DB Connected !!');
-        if (init === 0) {
-            const store = new MongoStore({ mongoose: mongoose });
-            const client = new Client({
-                puppeteer: {
-                    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-                    headless: true
-                },
-                authStrategy: new RemoteAuth({
-                    store: store,
-                    backupSyncIntervalMs: 300000
-                })
-            });
-            client.on('remote_session_saved', () => {
-                console.log('Remote Auth Saved');
-            })
-            client.initialize();
-            return client;
-        }
-        init++;
-    })
-}
-
-
-
-initializer()
-    .then((client) => {
-        // Socket IO Starts 
-        console.log('Inside Client !!');
-        io.on('connection', (socket) => {
-            console.log('User Connected');
-            state.notification = 'Connecting to WhatsApp Web Bot !!';
-            socket.emit('notification', state);
-
-            socket.on('disconnect', () => {
-                console.log('user disconnected');
-            });
-            // get & send qr code 
-            client.on('qr', qr => {
-                console.log('QR Code Sent!!')
-                qrcode.toDataURL(qr, (err, url) => {
-                    socket.emit('qrcode', url);
-                    state.notification = 'QR Code Received. Scan Please...'
-                    socket.emit('notification', state);
-                })
-                // qrcode.generate(qr, { small: true });
-            });
-            // send ready status 
-            client.on('ready', () => {
-                state.notification = 'Bot is Ready!';
-                state.connected = true
-                socket.emit('notification', state);
-                console.log('client is ready!');
-            });
-
-
-            client.on('authenticated', (session) => {
-                state.connected = true;
-                state.notification = 'Authenticated Successfully!';
-                socket.emit('authenticated', state);
-                console.log('Authenticated');
-            });
-            client.on('disconnected', (session) => {
-                state.connected = false;
-                state.notification = 'WhatsApp Bot Disconnected!!';
-                socket.emit('notification', state);
-                console.log('disconected');
-            });
-
-            client.on('message', async message => {
-                let msg = message.body.toLowerCase();
-                // let chat = await client.getChats()
-                message.reply('hi');
-                if (msg === '❤️' || msg === '🔥' || msg === '⚡') {
-                    message.reply(msg);
-                }
-                console.log(msg);
-                // waiting a second to get the latest chat 
-                // setTimeout(() => {
-                //     const start = async () => {
-                //         let chat = await client.getChats()
-
-                //         console.log('isGroup :', chat[0].isGroup, 'Msg :', msg)
-                //         if (chat[0].isGroup) {
-                //             state.notification = 'Group Chat Received!!';
-                //             state.groupChats++;
-                //         }
-                //         if (msg.includes('hpy') || msg.includes('hbd') || msg.includes('happy') || msg.includes('birthday') || msg.includes('bornday') || msg.includes('bday')) {
-                //             state.notification = 'Someone Wished you!!';
-                //             state.wishes++;
-                //             chat[0].sendSeen()
-                //             chat[0].sendStateTyping();
-                //         }
-                //         if (!chat[0].isGroup || !chat[0].isForwarded) {
-                state.notification = 'Chat Received!!';
-                //             state.personalChats++;
-                //             send(message, socket);
-                //             chat[0].sendSeen()
-                //             chat[0].sendStateTyping();
-                //             // after 1 second :: send message / reply to the message
-                //         }
-                socket.emit('message', state);
-                sendOut(message, client)
-                //     }
-                //     start();
-                // }, 1000);
-            });
-
-
-        })
-
-    })
-
-
-
-
-
-
-
-// seperate function to reply 
-const send = (message, socket) => {
-
-    let msg = message.body.toLowerCase();
-
-    let hiText = ['hi', 'hello', 'hlo', 'hloo', 'hie'];
-    let greetings = ['good morning', 'good night', 'good afternoon', 'gd mrng', 'gd night']
-
-    setTimeout(() => {
-        message.reply('Hi');
-    }, 2000);
-    // sendOut(message); 
-}
-
-// function to send message as ~ bot message 
-const sendOut = (message, client) => {
-    setTimeout(() => {
-        client.sendMessage(message.from, '~ bot message from Uday');
-    }, 1000);
-}
-
-
