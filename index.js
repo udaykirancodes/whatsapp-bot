@@ -98,6 +98,7 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
             socketSender('notification', 'Forwarded Message Received !!');
         }
         if (message.from.endsWith('@c.us')) {
+            state.personalChats++;
             send(message, client);
         }
         else {
@@ -124,27 +125,37 @@ const send = async (message, client) => {
     console.log(msg);
     let hiText = ['hi', 'hello', 'hlo', 'hloo', 'hie', 'hii'];
     let greetings = ['good morning', 'good night', 'good afternoon', 'gd mrng', 'gd night']
+    socketSender('notification', 'Chat Received');
     let chat = await client.getChats();
-    chat[0].sendSeen()
-    chat[0].sendStateTyping();
-    setTimeout(() => {
-        if (msg == '🥰' || msg == '🥳' || msg == '🥰' || msg == '😘' || msg == '😍' || msg == '🤩' || msg == '🥳' || msg == '❤️' || msg == '⚡' || msg == '🔥' || msg == '🤍' || msg == '🖤' || msg == '💥') {
+    if (msg == '🥰' || msg === '🥳' || msg === '🥰' || msg === '😘' || msg === '😍' || msg === '🤩' || msg === '🥳' || msg === '❤️' || msg === '⚡' || msg === '🔥' || msg === '🤍' || msg === '🖤' || msg === '💥') {
+        chat[0].sendSeen()
+        chat[0].sendStateTyping();
+        setTimeout(() => {
             message.reply(msg);
+        }, 500);
+    }
+    else if (msg.includes('hpy') || msg.includes('hbd') || msg.includes('happy') || msg.includes('birthday') || msg.includes('bornday') || msg.includes('bday')) {
+        socketSender('notification', 'Someone Wished Uday !!');
+        state.wishes++;
+        chat[0].sendSeen()
+        chat[0].sendStateTyping();
+        setTimeout(() => {
+            message.reply('Thankyou ❤️');
             return;
-        }
-        if (msg.includes('hpy') || msg.includes('hbd') || msg.includes('happy') || msg.includes('birthday') || msg.includes('bornday') || msg.includes('bday')) {
-            socketSender('notification', 'Someone Wished Uday !!');
-            state.wishes++;
-            message.reply('Thankyou ❤️\n');
-            sendOut(message, client);
+        }, 500);
+        sendOut(message, client);
+        return;
+    }
+    else if (msg == 'hi' || msg == 'hlo' || msg.includes('hi') || msg == 'hello' || msg == 'helo' || msg.includes('hlo')) {
+        chat[0].sendSeen()
+        chat[0].sendStateTyping();
+        setTimeout(() => {
+            message.reply('Hey! Hi👋');
             return;
-        }
-        else {
-            client.sendMessage(message.from, 'Uday will connect back to you !!');
-            client.sendMessage(message.from, '~ bot message from Uday');
-        }
-    }, 500);
-
+        }, 500);
+        sendOut(message, client);
+        return;
+    }
 }
 
 // function to send message as ~ bot message 
