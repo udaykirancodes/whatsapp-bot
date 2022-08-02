@@ -100,10 +100,13 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
         }
         if (message.from.endsWith('@c.us')) {
             state.personalChats++;
-            setTimeout(()=>{
-                await message.react('❤️')
-                send(message, client);
-            },500);
+            setTimeout(() => {
+                const asyncReactToMessage = async () => {
+                    await message.react('❤️')
+                    send(message, client);
+                }
+                asyncReactToMessage();
+            }, 500);
         }
         else {
             state.groupChats++;
