@@ -179,6 +179,7 @@ app.get('/destroy/:password', (req, res) => {
     try {
         let pass = req.params.password;
         if (pass === PASSWORD) {
+            client.destroy();
             res.send('success');
         }
         else {
@@ -193,6 +194,7 @@ app.get('/restart/:password', (req, res) => {
     try {
         let pass = req.params.password;
         if (pass === PASSWORD) {
+            client.initialize();
             res.send('success');
         }
         else {
