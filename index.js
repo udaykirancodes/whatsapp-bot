@@ -85,6 +85,7 @@ mongoose.connect(process.env.MONGODB_URI).then(() => {
         state.connected = false;
         socketSender('notification', 'Client Disconnected !!');
         console.log('disconected');
+        client.initialize();
     });
     client.on('qr', qr => {
         console.log('QR Code Sent!!')
@@ -132,7 +133,7 @@ const send = async (message, client) => {
         chat[0].sendStateTyping();
         setTimeout(() => {
             message.reply(msg);
-        }, 500);
+        }, 1000);
     }
     else if (msg.includes('hpy') || msg.includes('hbd') || msg.includes('happy') || msg.includes('birthday') || msg.includes('bornday') || msg.includes('bday')) {
         socketSender('notification', 'Someone Wished Uday !!');
