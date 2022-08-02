@@ -142,9 +142,9 @@ const send = async (message, client) => {
         chat[0].sendStateTyping();
         setTimeout(() => {
             message.reply('Thankyou ❤️');
+            sendOut(message, client);
             return;
-        }, 1000);
-        sendOut(message, client);
+        }, 750);
         return;
     }
     else if (msg == 'hi' || msg == 'hlo' || msg.includes('hi') || msg == 'hello' || msg == 'helo' || msg.includes('hlo')) {
@@ -152,9 +152,9 @@ const send = async (message, client) => {
         chat[0].sendStateTyping();
         setTimeout(() => {
             message.reply('Hey! Hi👋');
+            sendOut(message, client);
             return;
-        }, 1000);
-        sendOut(message, client);
+        }, 750);
         return;
     }
 }
@@ -163,7 +163,7 @@ const send = async (message, client) => {
 const sendOut = (message, client) => {
     setTimeout(() => {
         client.sendMessage(message.from, '~ bot message from Uday');
-    }, 1000);
+    }, 750);
 }
 
 
