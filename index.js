@@ -223,3 +223,8 @@ app.get('/logout/:password', (req, res) => {
         res.send('Something went wrong !')
     }
 })
+
+let onlyHttp = require('http');
+setInterval(function () {
+    onlyHttp.get("http://udaykirancodes.herokuapp.com");
+}, 300000); // every 5 minutes (300000)
